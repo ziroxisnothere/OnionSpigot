@@ -19,7 +19,7 @@
 +        // Purpur start
 +        int distance = getVersionFetcher().distance();
 +        final Component message = Component.join(net.kyori.adventure.text.JoinConfiguration.separator(Component.newline()),
-+            ChatColor.parseMM("<grey>Current Purpur Version: %s%s*", distance == 0 ? "<green>" : distance > 0 ? "<yellow>" : "<red>", Bukkit.getVersion()),
++            ChatColor.parseMM("<grey>Current OnionSpigot Version: %s%s*", distance == 0 ? "<green>" : distance > 0 ? "<yellow>" : "<red>", Bukkit.getVersion()),
 +            // Purpur end
              msg
          );

@@ -25,6 +25,9 @@ import org.bukkit.command.Command;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.purpurmc.purpur.command.OnionCommand;
+import org.purpurmc.purpur.command.OnionSpigotCommand;
+import org.purpurmc.purpur.command.OnionSpigotInfo;
 import org.purpurmc.purpur.command.PurpurCommand;
 
 import java.io.File;
@@ -57,6 +60,8 @@ public class PurpurConfig {
     public static int version;
     static boolean verbose;
 
+    private static boolean startupBannerShown = false; // OnionSpigot - Show the branded startup banner only once
+
     public static void init(File configFile) {
         CONFIG_FILE = configFile;
         config = new YamlConfiguration();
@@ -73,6 +78,8 @@ public class PurpurConfig {
 
         commands = new HashMap<>();
         commands.put("purpur", new PurpurCommand("purpur"));
+        commands.put("onion", new OnionCommand("onion")); // OnionSpigot - Add /onion command
+        commands.put("onionspigot", new OnionSpigotCommand("onionspigot")); // OnionSpigot - Add /onionspigot command
 
         version = getInt("config-version", 50);
         set("config-version", 50);
@@ -80,6 +87,13 @@ public class PurpurConfig {
         readConfig(PurpurConfig.class, null);
 
         Block.BLOCK_STATE_REGISTRY.forEach(BlockBehaviour.BlockStateBase::initCache);
+
+        // OnionSpigot start - Show branded startup banner (skipped on config reloads)
+        if (!startupBannerShown) {
+            startupBannerShown = true;
+            OnionSpigotInfo.printStartupBanner();
+        }
+        // OnionSpigot end - Show branded startup banner (skipped on config reloads)
     }
 
     protected static void log(String s) {
@@ -234,6 +248,15 @@ public class PurpurConfig {
     private static void serverModName() {
         serverModName = getString("settings.server-mod-name", serverModName);
     }
+
+    // OnionSpigot start - Configurable branding links used by /onion and /onionspigot
+    public static String onionRepoUrl = "https://github.com/ziroxisnothere/OnionSpigot";
+    public static String onionDocsUrl = "https://github.com/ziroxisnothere/OnionSpigot#readme";
+    private static void onionSettings() {
+        onionRepoUrl = getString("settings.onion.repo-url", onionRepoUrl);
+        onionDocsUrl = getString("settings.onion.docs-url", onionDocsUrl);
+    }
+    // OnionSpigot end - Configurable branding links used by /onion and /onionspigot
 
     public static double laggingThreshold = 19.0D;
     private static void tickLoopSettings() {

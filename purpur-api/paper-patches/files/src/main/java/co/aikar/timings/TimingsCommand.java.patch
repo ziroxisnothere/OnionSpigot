@@ -16,7 +16,7 @@
 -            sender.sendMessage(Timings.deprecationMessage());
 +            // Purpur start - Remove Timings
 +            net.kyori.adventure.text.minimessage.MiniMessage mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage();
-+            sender.sendMessage(mm.deserialize("<gold>Purpur has removed timings to save your performance. Please use <click:suggest_command:'/spark'><grey>/spark</grey></click> instead"));
++            sender.sendMessage(mm.deserialize("<gold>OnionSpigot has removed timings to save your performance. Please use <click:suggest_command:'/spark'><grey>/spark</grey></click> instead"));
 +            sender.sendMessage(mm.deserialize("<gold>For more information, view its documentation at"));
 +            sender.sendMessage(mm.deserialize("<gold><click:open_url:'https://spark.lucko.me/docs/Command-Usage'>https://spark.lucko.me/docs/Command-Usage</click>"));
 +            // Purpur end - Remove Timings

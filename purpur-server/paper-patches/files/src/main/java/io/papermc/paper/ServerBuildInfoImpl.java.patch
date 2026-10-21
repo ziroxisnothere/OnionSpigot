@@ -4,7 +4,7 @@
      private static final String ATTRIBUTE_GIT_COMMIT = "Git-Commit";
  
      private static final String BRAND_PAPER_NAME = "Paper";
-+    private static final String BRAND_PURPUR_NAME = "Purpur"; // Purpur - Rebrand
++    private static final String BRAND_ONIONSPIGOT_NAME = "OnionSpigot"; // OnionSpigot - Rebrand
  
      private static final String BUILD_DEV = "DEV";
  
@@ -13,10 +13,10 @@
              getManifestAttribute(manifest, ATTRIBUTE_BRAND_ID)
                  .map(Key::key)
 -                .orElse(BRAND_PAPER_ID),
-+                .orElse(BRAND_PURPUR_ID), // Purpur - Rebrand
++                .orElse(BRAND_ONIONSPIGOT_ID), // OnionSpigot - Rebrand
              getManifestAttribute(manifest, ATTRIBUTE_BRAND_NAME)
 -                .orElse(BRAND_PAPER_NAME),
-+                .orElse(BRAND_PURPUR_NAME), // Purpur - Rebrand
++                .orElse(BRAND_ONIONSPIGOT_NAME), // OnionSpigot - Rebrand
              SharedConstants.getCurrentVersion().id(),
              SharedConstants.getCurrentVersion().name(),
              getManifestAttribute(manifest, ATTRIBUTE_BUILD_NUMBER)
@@ -25,7 +25,7 @@
      @Override
      public boolean isBrandCompatible(final @NotNull Key brandId) {
 -        return brandId.equals(this.brandId);
-+        return brandId.equals(this.brandId) || brandId.equals(BRAND_PAPER_ID); // Purpur - Fix pufferfish issues // Purpur - Rebrand
++        return brandId.equals(this.brandId) || brandId.equals(BRAND_PAPER_ID) || brandId.equals(BRAND_PURPUR_ID) || brandId.equals(BRAND_ONIONSPIGOT_ID); // Purpur - Fix pufferfish issues // OnionSpigot - Rebrand - keep Paper and Purpur brand compatibility
      }
  
      @Override

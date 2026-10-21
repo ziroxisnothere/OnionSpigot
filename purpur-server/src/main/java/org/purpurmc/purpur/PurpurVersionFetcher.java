@@ -2,7 +2,6 @@ package org.purpurmc.purpur;
 
 import com.destroystokyo.paper.VersionHistoryManager;
 import com.destroystokyo.paper.util.VersionFetcher;
-import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -15,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.OptionalInt;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,15 +34,15 @@ public class PurpurVersionFetcher implements VersionFetcher {
     private static final Logger LOGGER = LogUtils.getClassLogger();
     private static final int DISTANCE_ERROR = -1;
     private static final int DISTANCE_UNKNOWN = -2;
-    private static final String DOWNLOAD_PAGE = "https://purpurmc.org/downloads";
-    private static final String REPOSITORY = "PurpurMC/Purpur";
+    private static final String DOWNLOAD_PAGE = "https://github.com/ziroxisnothere/OnionSpigot"; // OnionSpigot - Rebrand
+    private static final String REPOSITORY = "ziroxisnothere/OnionSpigot"; // OnionSpigot - Rebrand
     private static final ServerBuildInfo BUILD_INFO;
     private static final String USER_AGENT;
     private static final Gson GSON = new Gson();
 
     static {
         BUILD_INFO = ServerBuildInfo.buildInfo();
-        USER_AGENT = BUILD_INFO.brandName() + "/" + BUILD_INFO.asString(VERSION_SIMPLE) + " (https://purpurmc.org)";
+        USER_AGENT = BUILD_INFO.brandName() + "/" + BUILD_INFO.asString(VERSION_SIMPLE) + " (https://github.com/ziroxisnothere/OnionSpigot)"; // OnionSpigot - Rebrand
     }
 
     private static int distance = DISTANCE_UNKNOWN;
@@ -71,15 +69,11 @@ public class PurpurVersionFetcher implements VersionFetcher {
     }
 
     private static Component getUpdateStatusMessage() {
-        final OptionalInt buildNumber = BUILD_INFO.buildNumber();
-        if (buildNumber.isPresent()) {
-            distance = fetchDistanceFromSiteApi(buildNumber.getAsInt());
-        } else {
-            final Optional<String> gitBranch = BUILD_INFO.gitBranch();
-            final Optional<String> gitCommit = BUILD_INFO.gitCommit();
-            if (gitBranch.isPresent() && gitCommit.isPresent()) {
-                distance = fetchDistanceFromGitHub(gitBranch.get(), gitCommit.get());
-            }
+        // OnionSpigot start - Rebrand - resolve update state against the OnionSpigot repository
+        final Optional<String> gitBranch = BUILD_INFO.gitBranch();
+        final Optional<String> gitCommit = BUILD_INFO.gitCommit();
+        if (gitBranch.isPresent() && gitCommit.isPresent()) {
+            distance = fetchDistanceFromGitHub(gitBranch.get(), gitCommit.get());
         }
 
         return switch (distance) {
@@ -93,25 +87,7 @@ public class PurpurVersionFetcher implements VersionFetcher {
                         .hoverEvent(text("Click to open", NamedTextColor.WHITE))
                         .clickEvent(ClickEvent.openUrl(DOWNLOAD_PAGE))));
         };
-    }
-
-    private static int fetchDistanceFromSiteApi(final int jenkinsBuild) {
-        try {
-            try (final BufferedReader reader = Resources.asCharSource(
-                URI.create("https://api.purpurmc.org/v2/purpur/" + BUILD_INFO.minecraftVersionId()).toURL(),
-                StandardCharsets.UTF_8
-            ).openBufferedStream()) {
-                final JsonObject json = new Gson().fromJson(reader, JsonObject.class);
-                final int latest = json.getAsJsonObject("builds").getAsJsonPrimitive("latest").getAsInt();
-                return latest - jenkinsBuild;
-            } catch (final JsonSyntaxException ex) {
-                LOGGER.error("Error parsing json from Purpur's downloads API", ex);
-                return DISTANCE_ERROR;
-            }
-        } catch (final IOException e) {
-            LOGGER.error("Error while parsing version", e);
-            return DISTANCE_ERROR;
-        }
+        // OnionSpigot end - Rebrand - resolve update state against the OnionSpigot repository
     }
 
     // Contributed by Techcable <Techcable@outlook.com> in PaperMC/Paper GH-65
@@ -128,6 +104,7 @@ public class PurpurVersionFetcher implements VersionFetcher {
                 final String status = obj.get("status").getAsString();
                 return switch (status) {
                     case "identical" -> 0;
+                    case "ahead" -> DISTANCE_UNKNOWN; // OnionSpigot - custom build ahead of the tracked branch
                     case "behind" -> obj.get("behind_by").getAsInt();
                     default -> DISTANCE_ERROR;
                 };
