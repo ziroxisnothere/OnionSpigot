@@ -26,7 +26,7 @@
                  /*
                  BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
  
-@@ -250,6 +_,15 @@
+@@ -250,6 +_,23 @@
          io.papermc.paper.command.PaperCommands.registerCommands(this); // Paper - setup /paper command
          this.server.spark.registerCommandBeforePlugins(this.server); // Paper - spark
          com.destroystokyo.paper.Metrics.PaperMetrics.startMetrics(); // Paper - start metrics
@@ -37,6 +37,14 @@
 +            DedicatedServer.LOGGER.error("Unable to load server configuration", e);
 +            return false;
 +        }
++        // OnionSpigot start - Redstone Limiter (config lives next to purpur.yml)
++        try {
++            final java.io.File purpurSettingsFile = ((java.io.File) options.valueOf("purpur-settings")).getAbsoluteFile();
++            org.purpurmc.purpur.redstone.RedstoneLimiterConfig.init(purpurSettingsFile.getParentFile());
++        } catch (Exception e) {
++            DedicatedServer.LOGGER.error("Unable to load the redstone limiter configuration", e);
++        }
++        // OnionSpigot end - Redstone Limiter
 +        org.purpurmc.purpur.PurpurConfig.registerCommands();
 +        // Purpur end - Purpur config files
          com.destroystokyo.paper.VersionHistoryManager.INSTANCE.getClass(); // Paper - load version history now

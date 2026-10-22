@@ -33,7 +33,7 @@
  }
  
  tasks.generateDevelopmentBundle {
-@@ -86,7 +_,21 @@
+@@ -86,7 +_,22 @@
      }
  }
  
@@ -46,6 +46,7 @@
 +    }
 +    test {
 +        java { srcDir("../paper-server/src/test/java") }
++        java { srcDir("src/test/java") } // OnionSpigot - redstone limiter tests
 +        resources { srcDir("../paper-server/src/test/resources") }
 +    }
 +}
@@ -56,15 +57,17 @@
  configurations.named(log4jPlugins.compileClasspathConfigurationName) {
      extendsFrom(configurations.compileClasspath.get())
  }
-@@ -109,7 +_,7 @@
+@@ -109,8 +_,8 @@
  }
  
  dependencies {
 -    implementation(project(":paper-api"))
+-    implementation(platform("ca.spottedleaf.leafpile:bom:1.3.2"))
 +    implementation(project(":purpur-api")) // Purpur
-     implementation(platform("ca.spottedleaf.leafpile:bom:1.3.2"))
++    implementation(platform("ca.spottedleaf.leafpile:bom:1.3.0"))
      implementation("ca.spottedleaf.leafpile:common")
      implementation("ca.spottedleaf.leafpile:concurrentutil")
+     implementation("ca.spottedleaf.leafpile:converter")
 @@ -138,6 +_,10 @@
      implementation("org.ow2.asm:asm-commons:9.9.1")
      implementation("org.spongepowered:configurate-yaml:4.2.0")

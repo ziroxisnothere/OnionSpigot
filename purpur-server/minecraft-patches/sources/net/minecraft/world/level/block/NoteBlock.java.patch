@@ -9,3 +9,13 @@
              level.blockEvent(pos, this, 0, 0);
              level.gameEvent(source, GameEvent.NOTE_BLOCK_PLAY, pos);
          }
+@@ -148,6 +_,9 @@
+ 
+     @Override
+     protected boolean triggerEvent(final BlockState state, final Level level, final BlockPos pos, final int b0, final int b1) {
++        // OnionSpigot start - Redstone Limiter (note plays are block-event driven and cannot be deferred, so excess events are skipped)
++        if (org.purpurmc.purpur.redstone.RedstoneLimiter.check(level, pos, org.purpurmc.purpur.redstone.RedstoneLimiter.DeviceType.NOTE_BLOCK) == org.purpurmc.purpur.redstone.RedstoneLimiter.Verdict.SKIP) return false;
++        // OnionSpigot end - Redstone Limiter
+         NoteBlockInstrument instrument = state.getValue(INSTRUMENT);
+         // Paper start - move NotePlayEvent call to fix instrument/note changes
+         org.bukkit.event.block.NotePlayEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callNotePlayEvent(level, pos, instrument, state.getValue(NOTE));

@@ -1,0 +1,12 @@
+--- a/net/minecraft/world/level/block/piston/PistonBaseBlock.java
++++ b/net/minecraft/world/level/block/piston/PistonBaseBlock.java
+@@ -138,6 +_,9 @@
+ 
+     @Override
+     protected boolean triggerEvent(final BlockState state, final Level level, final BlockPos pos, final int b0, final int b1) {
++        // OnionSpigot start - Redstone Limiter (piston moves are block-event driven and cannot be deferred, so excess events are skipped)
++        if (org.purpurmc.purpur.redstone.RedstoneLimiter.check(level, pos, org.purpurmc.purpur.redstone.RedstoneLimiter.DeviceType.PISTON) == org.purpurmc.purpur.redstone.RedstoneLimiter.Verdict.SKIP) return false;
++        // OnionSpigot end - Redstone Limiter
+         Direction direction = state.getValue(FACING);
+         // Paper start - Protect Bedrock and End Portal/Frames from being destroyed; prevent retracting when we're facing the wrong way (we were replaced before retraction could occur)
+         Direction directionQueuedAs = Direction.from3DDataValue(b1 & 7); // Paper - copied from below

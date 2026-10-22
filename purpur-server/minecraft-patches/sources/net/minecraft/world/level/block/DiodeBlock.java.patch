@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/level/block/DiodeBlock.java
++++ b/net/minecraft/world/level/block/DiodeBlock.java
+@@ -49,6 +_,14 @@
+ 
+     @Override
+     protected void tick(final BlockState state, final ServerLevel level, final BlockPos pos, final RandomSource random) {
++        // OnionSpigot start - Redstone Limiter
++        final org.purpurmc.purpur.redstone.RedstoneLimiter.Verdict onionVerdict = org.purpurmc.purpur.redstone.RedstoneLimiter.check(level, pos, org.purpurmc.purpur.redstone.RedstoneLimiter.DeviceType.REPEATER);
++        if (onionVerdict == org.purpurmc.purpur.redstone.RedstoneLimiter.Verdict.SKIP) return;
++        if (onionVerdict == org.purpurmc.purpur.redstone.RedstoneLimiter.Verdict.DEFER) {
++            if (!level.getBlockTicks().hasScheduledTick(pos, this)) level.scheduleTick(pos, this, org.purpurmc.purpur.redstone.RedstoneLimiterConfig.get().delayTicks);
++            return;
++        }
++        // OnionSpigot end - Redstone Limiter
+         if (!this.isLocked(level, pos, state)) {
+             boolean on = state.getValue(POWERED);
+             boolean shouldTurnOn = this.shouldTurnOn(level, pos, state);
