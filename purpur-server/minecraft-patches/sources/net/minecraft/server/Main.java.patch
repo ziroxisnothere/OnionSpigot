@@ -8,7 +8,7 @@
  import java.io.File;
  import java.io.IOException;
  import java.io.UncheckedIOException;
-@@ -110,6 +_,13 @@
+@@ -110,6 +_,16 @@
                  JvmProfiler.INSTANCE.start(Environment.SERVER);
              }
  
@@ -19,6 +19,9 @@
 +            org.purpurmc.purpur.PurpurConfig.registerMinecraftDisabledCommands = purpurConfiguration.getBoolean("settings.register-minecraft-disabled-commands"); // Purpur - register disabled minecraft commands
 +            // Purpur end - Add toggle for enchant level clamping - load config files early
 +
++            // OnionSpigot start - Automatic plugin downloader (runs before plugin discovery)
++            org.purpurmc.purpur.plugin.OnionPluginDownloader.checkRequiredPlugins(options);
++            // OnionSpigot end - Automatic plugin downloader
              io.papermc.paper.plugin.PluginInitializerManager.load(options); // Paper
              Bootstrap.bootStrap();
              Bootstrap.validate();

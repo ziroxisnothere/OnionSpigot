@@ -21,9 +21,16 @@ a clean, branded identity and native software commands on top:
   Minecraft version, Java runtime, and project links).
 * `/onionspigot` — displays the same identity with a more detailed panel (build number or
   development-build metadata, git branch/commit, brand id, repository and documentation links).
-* A clean startup banner printed to the console on every server start.
+* A FIGlet `Onion` startup banner printed to the console on every server start.
+* **Console-only startup** — the Swing server GUI has been removed; the server always runs
+  headless from Windows CMD, PowerShell and Linux terminals (`--nogui` is accepted but no
+  longer necessary).
 * OnionSpigot branding for server identification (manifest metadata, `/version` output,
-  watchdog messages, server GUI title, and bStats platform name).
+  watchdog messages, console app name, and bStats platform name).
+* **Redstone Limiter** — an optional, configuration-driven system that limits redstone device
+  activity per chunk, per world, per source position and globally (see below).
+* **Automatic plugin downloader** — optionally downloads required plugins (PacketEvents,
+  spark) into the plugins directory before plugin discovery (see below).
 
 Both commands are native server commands registered through the standard Bukkit command map -
 no plugins, no extra dependencies. They work from the console and for players with the
@@ -33,6 +40,56 @@ and remain available after restarts. The links shown by these commands can be cu
 
 OnionSpigot is fully compatible with existing Paper/Purpur setups: existing worlds, plugins,
 and configuration files (including `purpur.yml`) continue to load unchanged.
+
+## Redstone Limiter
+
+On first startup OnionSpigot generates `redstonelimiter.yml` next to `purpur.yml`. The limiter
+is **disabled by default** — creating the file never changes redstone behavior; set
+`settings.enabled: true` to activate it.
+
+When enabled, the limiter tracks redstone *device* events (repeaters, comparators, pistons,
+observers, dispensers/droppers and note blocks) with interval-windowed counters and enforces:
+
+* `limits.max-updates-per-chunk` / `max-updates-per-world` / `max-events-per-check` (global
+  per interval) / `max-updates-per-source`
+* per-world `bypass`, `disabled` and `overrides` lists, and `worlds.apply-to-all-worlds`
+* `behavior.mode`:
+  * **`SKIP_EXCESS`** — once a limit is reached, further eligible device events are skipped
+    until the next interval (a piston stalls instead of moving; a repeater keeps its state).
+  * **`DELAY_EXCESS`** — tick-driven devices (repeaters, comparators, observers, dispensers,
+    droppers) re-schedule themselves `behavior.delay-ticks` later and retry when the limit
+    has recovered. Pistons and note blocks are block-event driven and **always skip** —
+    their events cannot be re-queued safely.
+
+Warnings are rate-limited (`behavior.log-limit-events`, `warning-cooldown-seconds`) and debug
+logging is throttled (`performance.debug-log-cooldown-ms`). Counters reset every interval
+(`behavior.reset-counters-every-interval`) or expire after inactivity
+(`performance.counter-expiration-seconds`). Invalid values are clamped to documented defaults
+with a console warning; a malformed file never prevents startup.
+
+Manage it at runtime with `/onion redstonelimiter status` (effective limits and current
+interval usage) and `/onion redstonelimiter reload` (re-reads the file, resets counters,
+applies everything live — no restart required).
+
+> [!NOTE]
+> Known trade-offs: redstone *wire* signal propagation is never limited (skipping wire
+> updates can leave ghost signals), so wire spam is not throttled — only device events are
+> counted. Skipping device events intentionally stalls the affected machine; clocks keep
+> retrying and recover automatically once below the limits.
+
+## Automatic plugin downloader
+
+On first startup OnionSpigot generates `onion-plugins.yml` in the server root. It downloads
+missing required plugins into the `plugins` directory **before plugin discovery**, so they
+load during the same startup without a second restart. Defaults ship with PacketEvents and
+spark; each entry can be disabled or pointed at any HTTPS URL.
+
+Safety behavior: valid existing jars are never replaced (a download only happens when the
+destination file is missing or invalid), downloads go through a temporary file and are
+validated (HTTP status, no HTML error page, jar archive containing `plugin.yml` or
+`paper-plugin.yml`) before being moved into place, HTTPS is enforced, timeouts and retries
+are bounded, and a failed download is reported while startup continues. Temporary files are
+always cleaned up. Set `settings.enabled: false` to turn the downloader off.
 
 ## Requirements
 
