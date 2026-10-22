@@ -1,13 +1,31 @@
 --- a/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -172,6 +_,7 @@
+@@ -36,7 +_,6 @@
+ import net.minecraft.server.ServerLinks;
+ import net.minecraft.server.Services;
+ import net.minecraft.server.WorldStem;
+-import net.minecraft.server.gui.MinecraftServerGui;
+ import net.minecraft.server.jsonrpc.ManagementServer;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
+@@ -81,7 +_,6 @@
+     // private final RconConsoleSource rconConsoleSource; // CraftBukkit - remove field
+     private @Nullable RconThread rconThread;
+     public DedicatedServerSettings settings;
+-    private @Nullable MinecraftServerGui gui;
+     private final @Nullable ServerTextFilter serverTextFilter;
+     private @Nullable RemoteSampleLogger tickTimeLogger;
+     private boolean isTickTimeLoggingEnabled;
+@@ -172,7 +_,9 @@
              public void run() {
                  if (!org.bukkit.craftbukkit.Main.useConsole) return; // CraftBukkit
                  // Paper start - Use TerminalConsoleAppender
-+                if (DedicatedServer.this.gui == null || System.console() != null) // Purpur - GUI Improvements - has no GUI or has console (did not double-click)
++                // OnionSpigot start - console-only startup: GUI removed, console always starts
                  new com.destroystokyo.paper.console.PaperConsole(DedicatedServer.this).start();
++                // OnionSpigot end - console-only startup
                  /*
                  BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+ 
 @@ -250,6 +_,15 @@
          io.papermc.paper.command.PaperCommands.registerCommands(this); // Paper - setup /paper command
          this.server.spark.registerCommandBeforePlugins(this.server); // Paper - spark
@@ -55,13 +73,37 @@
  
          // CraftBukkit start
          this.server.loadPlugins();
-@@ -366,6 +_,9 @@
-             MinecraftServerStatistics.registerJmxMonitoring(this);
+@@ -367,6 +_,9 @@
              LOGGER.info("JMX monitoring enabled");
          }
-+
+ 
 +        org.purpurmc.purpur.task.BossBarTask.startAll(); // Purpur - Implement TPSBar
 +        if (org.purpurmc.purpur.PurpurConfig.beeCountPayload) org.purpurmc.purpur.task.BeehiveTask.instance().register(); // Purpur - Give bee counts in beehives to Purpur clients
- 
++
          this.saveEverything(false, true, true);
          this.notificationManager().serverStarted();
+         return true;
+@@ -500,10 +_,6 @@
+             this.serverTextFilter.close();
+         }
+ 
+-        if (this.gui != null) {
+-            this.gui.close();
+-        }
+-
+         if (this.rconThread != null) {
+             this.rconThread.stopNonBlocking(); // Paper - don't wait for remote connections
+         }
+@@ -632,12 +_,6 @@
+     @Override
+     public String getServerName() {
+         return this.getMotd();
+-    }
+-
+-    public void showGui() {
+-        if (this.gui == null) {
+-            this.gui = MinecraftServerGui.showFrameFor(this);
+-        }
+     }
+ 
+     public int spawnProtectionRadius() {
